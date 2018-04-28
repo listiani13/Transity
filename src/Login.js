@@ -1,6 +1,7 @@
 // @flow
 import React, {Component} from 'react';
 import {
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -18,7 +19,7 @@ export default class Login extends Component<Props, State> {
   _resetAction = () => {
     const resetAction = NavigationActions.reset({
       index: 0,
-      actions: [NavigationActions.navigate({routeName: 'Tabs'})],
+      actions: [NavigationActions.navigate({routeName: 'MyTrips'})],
     });
     this.props.navigation.dispatch(resetAction);
   };
@@ -51,6 +52,16 @@ export default class Login extends Component<Props, State> {
             </View>
           </TouchableOpacity>
         </View>
+        <Image
+          source={require('./img/login-plane.png')}
+          style={{
+            width: 150,
+            height: 150,
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+          }}
+        />
       </View>
     );
   }

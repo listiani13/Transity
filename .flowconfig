@@ -1,4 +1,7 @@
 [ignore]
+
+<PROJECT_ROOT>/node_modules/metro/.*
+
 ; We fork some components by platform
 .*/*[.]android.js
 
@@ -72,4 +75,7 @@ suppress_comment=\\(.\\|\n\\)*\\$FlowExpectedError
 unsafe.enable_getters_and_setters=true
 
 [version]
-^0.56.0
+^0.68.0
+
+[untyped]
+<PROJECT_ROOT>/node_modules/react-native/Libraries/.*

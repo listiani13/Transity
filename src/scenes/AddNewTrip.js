@@ -1,24 +1,36 @@
 // @flow
 import React, {Component} from 'react';
 import {
+  Alert,
   Slider,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Button,
 } from 'react-native';
+import DateTimePicker from 'react-native-modal-datetime-picker';
 import {Ionicons} from '@expo/vector-icons';
+import sprintf from '../helpers/sprintf';
+type Props = {
+  navigation: Navigation,
+};
 type State = {
+  tripName: string,
+  tripDate: string,
   availTime: number,
   numDest: number,
+  tripDescription: string,
+  isDatePickerVisible: boolean,
 };
-type Props = {};
 export default class AddNewTrip extends Component<Props, State> {
   state: State = {
+    tripName: '',
+    tripDate: '',
     availTime: 4,
     numDest: 1,
+    tripDescription: '',
+    isDatePickerVisible: false,
   };
   static navigationOptions = ({navigation}) => {
     return {
@@ -32,11 +44,67 @@ export default class AddNewTrip extends Component<Props, State> {
           <Ionicons name="ios-arrow-back" size={20} color="white" />
         </TouchableOpacity>
       ),
-      headerStyle: {paddingLeft: 10, backgroundColor: '#E0A21F'},
+      headerStyle: {
+        paddingLeft: 10,
+        backgroundColor: '#E0A21F',
+        borderBottomColor: 'transparent',
+      },
       headerTintColor: 'white',
     };
   };
+  _getRoute = async () => {
+    let {availTime, numDest, tripName, tripDate, tripDescription} = this.state;
+    if (tripName !== '' && tripDate !== '' && tripDescription !== '') {
+      try {
+        let data = await fetch(
+          `http://localhost/ga_test/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
+        );
+        let jsonData = await data.json();
+        let destination = jsonData[1].destinasi;
+        this.props.navigation.navigate('RouteScene', {
+          destination,
+          availTime,
+          numDest,
+          tripName,
+          tripDate,
+        });
+      } catch (error) {
+        this._displayErrorMessage('Error Occured', error.message);
+      }
+    } else {
+      this._displayErrorMessage('Warning', 'Please fill all the inputs');
+    }
+  };
+  _displayErrorMessage = (title: string, message: string) => {
+    Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
+      cancelable: false,
+    });
+  };
+  _onEndEditing = (event, inputName) => {
+    let text = event.nativeEvent.text;
+    this.setState({[inputName]: text});
+  };
+  _showDateTimePicker = () =>
+    this.setState({
+      isDatePickerVisible: true,
+    });
+
+  _hideDateTimePicker = () =>
+    this.setState({
+      isDatePickerVisible: false,
+    });
+
+  _handleDatePicked = (date) => {
+    let month = sprintf(date.getMonth().toString());
+    let day = sprintf(date.getDay().toString());
+    let year = date.getFullYear();
+    let newDateString = day + '/' + month + '/' + year;
+
+    this.setState({tripDate: newDateString});
+    this._hideDateTimePicker();
+  };
   render() {
+    let {tripDate} = this.state;
     return (
       <View style={styles.container}>
         <View>
@@ -53,6 +121,10 @@ export default class AddNewTrip extends Component<Props, State> {
                   <TextInput
                     placeholder={`Trip Name`}
                     style={styles.txtInputTripName}
+                    onEndEditing={(event) => {
+                      this._onEndEditing(event, 'tripName');
+                    }}
+                    autoCorrect={false}
                   />
                 </View>
               </View>
@@ -69,9 +141,20 @@ export default class AddNewTrip extends Component<Props, State> {
                 </View>
                 <View style={styles.txtInputTripNameContainer}>
                   {/* TODO: Change into modal date picker */}
-                  <TextInput
-                    placeholder={`Date`}
-                    style={styles.txtInputTripName}
+                  <TouchableOpacity onPress={this._showDateTimePicker}>
+                    <TextInput
+                      placeholder={`Date`}
+                      style={styles.txtInputTripName}
+                      onFocus={this._showDateTimePicker}
+                      value={tripDate}
+                      editable={false}
+                      pointerEvents="none"
+                    />
+                  </TouchableOpacity>
+                  <DateTimePicker
+                    isVisible={this.state.isDatePickerVisible}
+                    onConfirm={this._handleDatePicked}
+                    onCancel={this._hideDateTimePicker}
                   />
                 </View>
               </View>
@@ -81,6 +164,28 @@ export default class AddNewTrip extends Component<Props, State> {
             <View style={styles.fieldInnerContainer}>
               <View style={styles.circleNumbering}>
                 <Text>3</Text>
+              </View>
+              <View style={styles.inputContainer}>
+                <View style={styles.lblTripNameContainer}>
+                  <Text style={styles.lblTripName}>Description:</Text>
+                </View>
+                <View style={styles.txtInputTripNameContainer}>
+                  {/* TODO: Change into modal date picker */}
+                  <TextInput
+                    placeholder={`Description`}
+                    style={styles.txtInputTripName}
+                    onEndEditing={(event) => {
+                      this._onEndEditing(event, 'tripDescription');
+                    }}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+          <View style={styles.fieldContainer}>
+            <View style={styles.fieldInnerContainer}>
+              <View style={styles.circleNumbering}>
+                <Text>4</Text>
               </View>
               <View style={styles.inputContainer}>
                 <View style={styles.lblTripNameContainer}>
@@ -127,24 +232,12 @@ export default class AddNewTrip extends Component<Props, State> {
             </View>
           </View>
         </View>
-        <View style={styles.btnContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              this.props.navigation.goBack();
-            }}
-          >
+
+        <TouchableOpacity onPress={this._getRoute} style={styles.btnContainer}>
+          <View>
             <Text style={styles.txtBtnNext}>Next</Text>
-          </TouchableOpacity>
-        </View>
-        {/* <Text>Detail 1</Text>
-        <Button
-          onPress={() => {
-            this.props.navigation.goBack();
-          }}
-          title="Go Back"
-          color="#841584"
-          accessibilityLabel="Learn more about this purple button"
-        /> */}
+          </View>
+        </TouchableOpacity>
       </View>
     );
   }
