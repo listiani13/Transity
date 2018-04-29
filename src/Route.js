@@ -5,9 +5,16 @@ import Login from './scenes/Login';
 import MyTrips from './scenes/MyTripsScene';
 import RouteScene from './scenes/RouteScene/RouteScene';
 import HomeScene from './scenes/HomeScene/HomeScene';
+import SplashScene from './scenes/SplashScene/SplashScene';
 
 export default StackNavigator(
   {
+    SplashScene: {
+      screen: SplashScene,
+      navigationOptions: {
+        header: null,
+      },
+    },
     Login: {
       screen: Login,
       navigationOptions: {
@@ -21,6 +28,6 @@ export default StackNavigator(
   },
   {
     headerMode: 'screen',
-    initialRouteName: 'Login',
+    initialRouteName: 'SplashScene',
   },
 );
