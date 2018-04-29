@@ -1,12 +1,17 @@
 // @flow
 
 import React, {Component} from 'react';
-import {TouchableOpacity, View, StyleSheet, ScrollView} from 'react-native';
-import {Ionicons} from '@expo/vector-icons';
-
-import Card from '../../components/Card';
-import {Text} from '../../components/CoreComponents';
-import Destination from './components/Destination';
+import {AsyncStorage, View, StyleSheet, ScrollView} from 'react-native';
+import {SimpleLineIcons} from '@expo/vector-icons';
+import {
+  MenuContext,
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+} from 'react-native-popup-menu';
+// $FlowFixMe
+import {NavigationActions} from 'react-navigation';
 import FloatingButton from './components/FloatingButton';
 import Trip from './components/Trip';
 
@@ -14,7 +19,7 @@ import {baseColors, BACKGROUND_GREY} from '../../constants/colors';
 import {baseTextStyle} from '../../constants/text';
 
 type Props = {
-  navigation: Navigation,
+  navigation: NavigationObject,
 };
 
 type DestDatum = {
@@ -37,14 +42,67 @@ type State = {
 const PADDING_HORIZONTAL = 10;
 
 export default class HomeScene extends Component<Props, State> {
-  static navigationOptions = {
-    headerTitle: 'My Trips',
-    headerStyle: {
-      paddingLeft: 10,
-      backgroundColor: '#E0A21F',
-      borderBottomColor: 'transparent',
-    },
-    headerTintColor: 'white',
+  static navigationOptions = ({navigation}) => {
+    const {params = {}} = navigation.state;
+    return {
+      headerTitle: 'My Trips',
+      headerStyle: {
+        paddingLeft: 10,
+        backgroundColor: '#E0A21F',
+        borderBottomColor: 'transparent',
+      },
+      headerTintColor: 'white',
+      headerRight: (
+        <MenuContext
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: PADDING_HORIZONTAL,
+          }}
+        >
+          <View>
+            <Menu style={{zIndex: 99}}>
+              <MenuTrigger style={{zIndex: 99}}>
+                <View style={{width: 80, alignItems: 'flex-end'}}>
+                  <SimpleLineIcons
+                    name="options-vertical"
+                    size={baseTextStyle.LARGE_FONT_SIZE}
+                    color={baseColors.white}
+                  />
+                </View>
+              </MenuTrigger>
+              <MenuOptions style={{zIndex: 99}}>
+                <MenuOption onSelect={params.logout} text="Log Out" />
+              </MenuOptions>
+            </Menu>
+          </View>
+        </MenuContext>
+      ),
+    };
+  };
+  componentDidMount() {
+    this.props.navigation.setParams({logout: this._logout});
+  }
+
+  _logout = () => {
+    AsyncStorage.getItem('username').then((data) => {
+      if (data != null) {
+        AsyncStorage.removeItem('username').then((error) => {
+          if (error == null) {
+            const resetAction = NavigationActions.reset({
+              index: 0,
+              actions: [
+                NavigationActions.navigate({
+                  routeName: 'Login',
+                }),
+              ],
+            });
+            this.props.navigation.dispatch(resetAction);
+          }
+        });
+      }
+    });
   };
   state = {
     data: [

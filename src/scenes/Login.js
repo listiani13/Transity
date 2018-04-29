@@ -1,21 +1,70 @@
 // @flow
 import React, {Component} from 'react';
-import {Image, StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  Alert,
+  AsyncStorage,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 // $FlowFixMe
 import {NavigationActions} from 'react-navigation';
 import Button from '../components/button';
+import {SERVER_NAME} from '../data/config';
 
 type Props = {
   navigation: Object,
 };
-type State = {};
+type State = {
+  username: string,
+  password: string,
+};
+
 export default class Login extends Component<Props, State> {
+  state = {username: '', password: ''};
+  _displayErrorMessage = (title: string, message: string) => {
+    Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
+      cancelable: false,
+    });
+  };
+  _getLoginData = async () => {
+    let {username, password} = this.state;
+    let body = {username, password};
+
+    try {
+      let data = await fetch('http://192.168.0.12/transity_backend/Login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      let jsonData = await data.json();
+      if (jsonData.status === 'OK') {
+        await AsyncStorage.setItem('username', username);
+        this._resetAction();
+      } else {
+        this._displayErrorMessage(
+          'Login Failed',
+          'Username and password did not match!',
+        );
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
   _resetAction = () => {
     const resetAction = NavigationActions.reset({
       index: 0,
-      actions: [NavigationActions.navigate({routeName: 'MyTrips'})],
+      actions: [NavigationActions.navigate({routeName: 'HomeScene'})],
     });
     this.props.navigation.dispatch(resetAction);
+  };
+
+  _saveData = (val, inputName) => {
+    this.setState({[inputName]: val});
   };
   render() {
     return (
@@ -29,13 +78,19 @@ export default class Login extends Component<Props, State> {
             placeholder={'Username'}
             style={styles.txtInput}
             underlineColorAndroid="transparent"
+            onChangeText={(val) => this._saveData(val, 'username')}
+            autoCapitalize={'none'}
           />
+          {/* TODO: Find better way rather than onChange to handle auto complete from google */}
           <TextInput
             placeholder={'Password'}
             style={styles.txtInput}
             underlineColorAndroid="transparent"
+            onChangeText={(val) => this._saveData(val, 'password')}
+            secureTextEntry={true}
+            autoCapitalize={'none'}
           />
-          <Button onPress={this._resetAction} textVal="LOGIN" />
+          <Button onPress={this._getLoginData} textVal="LOGIN" />
         </View>
         <Image
           source={require('../img/login-plane.png')}

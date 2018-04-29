@@ -37,6 +37,7 @@
     "react-native": "0.52.0",
     "react-native-datepicker": "^1.6.0",
     "react-native-modal-datetime-picker": "^5.1.0",
+    "react-native-popup-menu": "^0.8.0",
     "react-navigation": "^1.0.3"
   },
   "prettier": {
