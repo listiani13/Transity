@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import {Text} from '../../components/CoreComponents';
 import Destination from '../components/Destination';
-import IconText from '../components/IconText';
 import {baseColors} from '../../constants/colors';
 import {Ionicons} from '@expo/vector-icons';
 
