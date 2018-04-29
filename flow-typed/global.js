@@ -12,6 +12,7 @@ declare type NavigationState = {
   index: number,
   key: string,
   routes: Array<NavigationRoute | (NavigationRoute & NavigationState)>,
+  params: Object,
 };
 
 declare type NavigationRoute = {

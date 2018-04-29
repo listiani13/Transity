@@ -1,15 +1,9 @@
 // @flow
 import React, {Component} from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Image, StyleSheet, Text, TextInput, View} from 'react-native';
 // $FlowFixMe
 import {NavigationActions} from 'react-navigation';
+import Button from '../components/button';
 
 type Props = {
   navigation: Object,
@@ -41,19 +35,10 @@ export default class Login extends Component<Props, State> {
             style={styles.txtInput}
             underlineColorAndroid="transparent"
           />
-          <TouchableOpacity
-            onPress={() => {
-              this._resetAction();
-            }}
-            style={styles.btnLogin}
-          >
-            <View>
-              <Text style={styles.txtLogin}>LOGIN</Text>
-            </View>
-          </TouchableOpacity>
+          <Button onPress={this._resetAction} textVal="LOGIN" />
         </View>
         <Image
-          source={require('./img/login-plane.png')}
+          source={require('../img/login-plane.png')}
           style={{
             width: 150,
             height: 150,

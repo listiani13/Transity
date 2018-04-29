@@ -7,11 +7,12 @@ import {Text} from '../../components/CoreComponents';
 type Props = {
   placeName: string,
   index: number | string,
+  placeDesc: string,
 };
 
 const WIDTH = 40;
 export default function Destination(props: Props) {
-  let {placeName, index} = props;
+  let {placeName, index, placeDesc} = props;
   let number = index + 1;
   return (
     <View style={styles.container}>
@@ -20,7 +21,7 @@ export default function Destination(props: Props) {
       </View>
       <View>
         <Text>{placeName}</Text>
-        <Text size="SMALL">Starting Point </Text>
+        <Text size="SMALL">{placeDesc}</Text>
       </View>
     </View>
   );

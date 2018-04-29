@@ -10,8 +10,7 @@ import type {Node} from 'react';
 
 type OnPressFunc = (param?: mixed) => void;
 type Props = {
-  size?:
-    | 'DEFAULT'
+  size?: 'DEFAULT'
     | 'EXTRA_SMALL'
     | 'SMALL'
     | 'MEDIUM'

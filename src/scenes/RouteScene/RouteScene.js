@@ -8,14 +8,14 @@ import {
   View,
   FlatList,
 } from 'react-native';
-import {Text} from '../components/CoreComponents';
-import Destination from './components/Destination';
-import IconText from './components/IconText';
-import {baseColors} from '../constants/colors';
+import {Text} from '../../components/CoreComponents';
+import Destination from '../components/Destination';
+import IconText from '../components/IconText';
+import {baseColors} from '../../constants/colors';
 import {Ionicons} from '@expo/vector-icons';
 
 type Props = {
-  navigation: Navigation,
+  navigation: NavigationObject,
 };
 type State = {
   destination: Array<string>,
@@ -58,25 +58,37 @@ export default class RouteScene extends Component<Props, State> {
       tripDate,
     });
   };
-
-  state = {destination: [], tripName: '', tripDate: ''};
-  componentDidMount() {
-    this._getInitialState();
-  }
-  _getRoute = async () => {
-    let {params} = this.props.navigation.state;
-    let {availTime, numDest} = params;
-    try {
-      let data = await fetch(
-        `http://localhost/ga_test/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
-      );
-      let jsonData = await data.json();
-      let destination = jsonData[1].destinasi;
-      this.setState({destination});
-    } catch (error) {
-      this._displayErrorMessage('Error Occured', error.message);
-    }
+  // state = {destination: [], tripName: 'Hello', tripDate: ''};
+  state = {
+    destination: [
+      'Ngurah Rai',
+      'Tanah Lot',
+      'Taman Ayun',
+      'Ngurah Rai',
+      'Tanah Lot',
+      'Taman Ayun',
+    ],
+    tripName: 'Hello',
+    tripDate: '',
   };
+
+  // componentDidMount() {
+  //   this._getInitialState();
+  // }
+  // _getRoute = async () => {
+  //   let {params} = this.props.navigation.state;
+  //   let {availTime, numDest} = params;
+  //   try {
+  //     let data = await fetch(
+  //       `http://localhost/ga_test/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
+  //     );
+  //     let jsonData = await data.json();
+  //     let destination = jsonData[1].destinasi;
+  //     this.setState({destination});
+  //   } catch (error) {
+  //     this._displayErrorMessage('Error Occured', error.message);
+  //   }
+  // };
 
   _displayErrorMessage = (title: string, message: string) => {
     Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
@@ -85,7 +97,7 @@ export default class RouteScene extends Component<Props, State> {
   };
 
   _renderItem = ({item, index}) => {
-    return <Destination placeName={item} index={index} />;
+    return <Destination placeName={item} index={index} placeDesc={'20mins'} />;
   };
   _renderSeparator = () => {
     return (
@@ -127,30 +139,19 @@ export default class RouteScene extends Component<Props, State> {
     let from = params ? params.from : null;
     return (
       <View style={{alignItems: 'stretch', flex: 1}}>
-        <View style={styles.headerContainer}>
-          <Text size="EXTRA_LARGE">My Trip</Text>
-          <IconText
-            iconName="ion"
-            iconTitle="ios-car"
-            iconSize={20}
-            textVal="25.0 km"
-          />
-          <IconText
-            iconName="evil"
-            iconTitle="clock"
-            iconSize={20}
-            textVal="2.50 hrs"
-          />
-        </View>
         <View
-          style={{justifyContent: 'flex-start', flex: 7, alignItems: 'stretch'}}
+          style={{
+            justifyContent: 'flex-start',
+            flex: 7,
+            alignItems: 'stretch',
+          }}
         >
           <FlatList
             data={destination}
             keyExtractor={(_, idx) => idx.toString()}
             renderItem={this._renderItem}
             ItemSeparatorComponent={this._renderSeparator}
-            style={{padding: 20}}
+            contentContainerStyle={{padding: 20}}
           />
         </View>
         {from == null ? (
