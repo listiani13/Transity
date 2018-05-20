@@ -8,19 +8,23 @@ import {
   View,
   FlatList,
 } from 'react-native';
-import {Text} from '../../components/CoreComponents';
+import {Loading, Text} from '../../components/CoreComponents';
 import Destination from '../components/Destination';
 import {baseColors} from '../../constants/colors';
 import {Ionicons} from '@expo/vector-icons';
+import {SERVER_NAME} from '../../data/config';
 
+import type {RouteData, DataTripDB} from '../../types';
 type Props = {
   navigation: NavigationObject,
 };
 type State = {
-  destination: Array<string>,
+  destination: RouteData,
   tripName: string,
   tripDate: string,
+  isLoading: boolean,
 };
+const VELOCITY = 40;
 export default class RouteScene extends Component<Props, State> {
   static navigationOptions = ({navigation}) => {
     const {params = {}} = navigation.state;
@@ -45,6 +49,20 @@ export default class RouteScene extends Component<Props, State> {
       headerTintColor: 'white',
     };
   };
+  // state = {destination: [], tripName: 'Hello', tripDate: ''};
+  state = {
+    destination: [],
+    tripName: '',
+    tripDate: '',
+    isLoading: false,
+  };
+
+  componentDidMount() {
+    console.log('route scene');
+
+    this._getInitialState();
+  }
+
   _getInitialState = () => {
     let {params} = this.props.navigation.state;
     let {destination, tripName, tripDate} = params;
@@ -57,37 +75,42 @@ export default class RouteScene extends Component<Props, State> {
       tripDate,
     });
   };
-  // state = {destination: [], tripName: 'Hello', tripDate: ''};
-  state = {
-    destination: [
-      'Ngurah Rai',
-      'Tanah Lot',
-      'Taman Ayun',
-      'Ngurah Rai',
-      'Tanah Lot',
-      'Taman Ayun',
-    ],
-    tripName: 'Hello',
-    tripDate: '',
-  };
 
-  // componentDidMount() {
-  //   this._getInitialState();
-  // }
-  // _getRoute = async () => {
-  //   let {params} = this.props.navigation.state;
-  //   let {availTime, numDest} = params;
-  //   try {
-  //     let data = await fetch(
-  //       `http://localhost/ga_test/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
-  //     );
-  //     let jsonData = await data.json();
-  //     let destination = jsonData[1].destinasi;
-  //     this.setState({destination});
-  //   } catch (error) {
-  //     this._displayErrorMessage('Error Occured', error.message);
-  //   }
-  // };
+  _getRoute = async () => {
+    this.setState({isLoading: true});
+    let {params} = this.props.navigation.state;
+    let {availTime, numDest} = params;
+    try {
+      let data = await fetch(
+        `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
+      );
+      let jsonData = await data.json();
+      let destination = jsonData.destination;
+      let destDesc: RouteData = [];
+      let idxTravelDistance = 0;
+      destination = destination.map((val, idx) => {
+        idxTravelDistance = idx - 1;
+        if (idx === 0) {
+          destDesc.push({
+            placeName: val,
+            placeDesc: 'Starting Point',
+            travelTime: null,
+          });
+        } else {
+          destDesc.push({
+            placeName: val,
+            placeDesc: jsonData.travel_distance[idxTravelDistance] + ' km',
+            travelTime: jsonData.travel_distance / VELOCITY,
+          });
+        }
+      });
+      setTimeout(() => {
+        this.setState({isLoading: false, destination: destDesc});
+      }, 500);
+    } catch (error) {
+      this._displayErrorMessage('Error Occured', error.message);
+    }
+  };
 
   _displayErrorMessage = (title: string, message: string) => {
     Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
@@ -96,7 +119,23 @@ export default class RouteScene extends Component<Props, State> {
   };
 
   _renderItem = ({item, index}) => {
-    return <Destination placeName={item} index={index} placeDesc={'20mins'} />;
+    if (item.travelTime != null) {
+      return (
+        <Destination
+          placeName={item.placeName}
+          index={index}
+          placeDesc={item.placeDesc}
+          placeTime={item.travelTime}
+        />
+      );
+    }
+    return (
+      <Destination
+        placeName={item.placeName}
+        index={index}
+        placeDesc={item.placeDesc}
+      />
+    );
   };
   _renderSeparator = () => {
     return (
@@ -129,11 +168,12 @@ export default class RouteScene extends Component<Props, State> {
       });
       // await AsyncStorage.removeItem('myTrip');
       await AsyncStorage.setItem('myTrip', JSON.stringify(currDest));
-      this.props.navigation.navigate('MyTrips');
+      this.props.navigation.navigate('HomeScene');
     } catch (error) {}
   };
+
   render() {
-    let {destination} = this.state;
+    let {destination, isLoading} = this.state;
     let {params} = this.props.navigation.state;
     let from = params ? params.from : null;
     return (
@@ -165,6 +205,7 @@ export default class RouteScene extends Component<Props, State> {
             </TouchableOpacity>
           </View>
         ) : null}
+        {isLoading ? <Loading /> : null}
       </View>
     );
   }

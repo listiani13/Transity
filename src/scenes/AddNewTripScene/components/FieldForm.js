@@ -18,7 +18,7 @@ type Props =
       index: string,
       type: 'TEXT_INPUT',
       placeholder?: string,
-      onEndEditing?: Function,
+      onChangeText?: Function,
     }
   | {
       index: string,
@@ -62,7 +62,7 @@ export default function FieldForm(props: Props) {
           <TextInput
             placeholder={placeholder}
             style={styles.txtInputTripName}
-            onEndEditing={props.onEndEditing}
+            onChangeText={props.onChangeText}
             autoCorrect={false}
             underlineColorAndroid="transparent"
           />
@@ -91,7 +91,7 @@ export default function FieldForm(props: Props) {
           </TouchableOpacity>
           <DateTimePicker
             isVisible={isVisible}
-            onConfirm={onConfirm}
+            onConfirm={(date) => onConfirm(date)}
             onCancel={onCancel}
           />
         </View>

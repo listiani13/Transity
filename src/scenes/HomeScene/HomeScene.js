@@ -1,7 +1,14 @@
 // @flow
 
 import React, {Component} from 'react';
-import {AsyncStorage, View, StyleSheet, ScrollView} from 'react-native';
+import {
+  AsyncStorage,
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  InteractionManager,
+} from 'react-native';
 import {SimpleLineIcons} from '@expo/vector-icons';
 import {
   MenuContext,
@@ -12,29 +19,19 @@ import {
 } from 'react-native-popup-menu';
 // $FlowFixMe
 import {NavigationActions} from 'react-navigation';
+import {Text} from '../../components/CoreComponents';
 import FloatingButton from './components/FloatingButton';
 import Trip from './components/Trip';
 
 import {baseColors, BACKGROUND_GREY} from '../../constants/colors';
 import {baseTextStyle} from '../../constants/text';
 
+import type {TripDatum} from '../../types';
+
 type Props = {
   navigation: NavigationObject,
 };
 
-type DestDatum = {
-  placeName: string,
-  placeDesc: string,
-  travelTime?: string,
-};
-export type RouteData = Array<DestDatum>;
-type TripDatum = {
-  id: string,
-  title: string,
-  isOpen: boolean,
-  sight: number,
-  route: RouteData,
-};
 type State = {
   data: Array<TripDatum>,
 };
@@ -42,7 +39,9 @@ type State = {
 const PADDING_HORIZONTAL = 10;
 
 export default class HomeScene extends Component<Props, State> {
-  static navigationOptions = ({navigation}) => {
+  static navigationOptions: ({navigation: NavigationObject}) => Object = ({
+    navigation,
+  }) => {
     const {params = {}} = navigation.state;
     return {
       headerTitle: 'My Trips',
@@ -53,36 +52,43 @@ export default class HomeScene extends Component<Props, State> {
       },
       headerTintColor: 'white',
       headerRight: (
-        <MenuContext
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: PADDING_HORIZONTAL,
-          }}
-        >
-          <View>
-            <Menu style={{zIndex: 99}}>
-              <MenuTrigger style={{zIndex: 99}}>
-                <View style={{width: 80, alignItems: 'flex-end'}}>
-                  <SimpleLineIcons
-                    name="options-vertical"
-                    size={baseTextStyle.LARGE_FONT_SIZE}
-                    color={baseColors.white}
-                  />
-                </View>
-              </MenuTrigger>
-              <MenuOptions style={{zIndex: 99}}>
-                <MenuOption onSelect={params.logout} text="Log Out" />
-              </MenuOptions>
-            </Menu>
-          </View>
-        </MenuContext>
+        <View>
+          <MenuContext
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: PADDING_HORIZONTAL,
+            }}
+          >
+            <TouchableOpacity onPress={params.logout}>
+              <Text style={{color: 'white'}}>Sign Out</Text>
+              {/* <Menu style={{zIndex: 99}}>
+                <MenuTrigger style={{zIndex: 99}}>
+                  <View style={{width: 80, alignItems: 'flex-end'}}>
+                    <SimpleLineIcons
+                      name="options-vertical"
+                      size={baseTextStyle.LARGE_FONT_SIZE}
+                      color={baseColors.white}
+                    />
+                  </View>
+                </MenuTrigger>
+                <MenuOptions style={{zIndex: 99}}>
+                  <MenuOption onSelect={params.logout} text="Log Out" />
+                </MenuOptions>
+              </Menu> */}
+            </TouchableOpacity>
+          </MenuContext>
+        </View>
       ),
     };
   };
   componentDidMount() {
-    this.props.navigation.setParams({logout: this._logout});
+    console.log('did mount');
+    InteractionManager.runAfterInteractions(() => {
+      this.props.navigation.setParams({logout: this._logout});
+    });
+    this._getInitialState();
   }
 
   _logout = () => {
@@ -104,43 +110,61 @@ export default class HomeScene extends Component<Props, State> {
       }
     });
   };
+
   state = {
-    data: [
-      {
-        id: '201',
-        title: 'Trip dari mata turun ke hati',
-        sight: 2,
+    data: [],
+  };
+
+  // _getInitialState = () => {
+  //   // this.props.navigation.setParams({logout: this._logout});
+  //   AsyncStorage.getItem('myTrip').then((data) => {
+  //     if (data != null) {
+  //       data = JSON.parse(data);
+  //     } else {
+  //       data = [];
+  //     }
+  //     let newTrip: Array<TripDatum> = data.map((data, index) => {
+  //       return {
+  //         id: index.toString(),
+  //         title: data.name,
+  //         isOpen: false,
+  //         sight: data.route.length,
+  //         route: data.route,
+  //       };
+  //     });
+  //     this.setState({data: newTrip});
+  //   });
+  // };
+  _getInitialState = async () => {
+    console.log('getInitialState');
+    // this.props.navigation.setParams({logout: this._logout});
+    let myTrip = await AsyncStorage.getItem('myTrip');
+    if (myTrip != null) {
+      myTrip = JSON.parse(myTrip);
+    } else {
+      myTrip = [];
+    }
+    let newTrip: Array<TripDatum> = myTrip.map((data, index) => {
+      return {
+        id: index.toString(),
+        title: data.name,
         isOpen: false,
-        route: [
-          {placeName: 'Ngurah Rai', placeDesc: 'Starting Point'},
-          {placeName: 'Taman Ayun', placeDesc: 'Nice', travelTime: '20 mins'},
-          {placeName: 'Tanah Lot', placeDesc: '', travelTime: '70 mins'},
-          {placeName: 'Ngurah Rai', placeDesc: '', travelTime: '80 mins'},
-        ],
-      },
-      {
-        id: '202',
-        title: 'Choi Seung Hyun',
-        sight: 1,
-        isOpen: false,
-        route: [
-          {placeName: 'Ngurah Rai', placeDesc: 'Starting Point'},
-          {placeName: 'Taman Ayun', placeDesc: 'Nice', travelTime: '20 mins'},
-          {placeName: 'Ngurah Rai', placeDesc: '', travelTime: '80 mins'},
-        ],
-      },
-    ],
+        sight: data.route.length,
+        route: data.route,
+      };
+    });
+    this.setState({data: newTrip});
   };
 
   _onToggleRoute = (id) => {
-    let newData = [...this.state.data];
+    let {data} = this.state;
+    let newData = [...data];
     for (let datum of newData) {
       if (datum.id === id) {
         datum.isOpen = !datum.isOpen;
       }
     }
-
-    this.setState({data: newData});
+    this.setState({data: newData}, console.log('newData', newData));
   };
   render() {
     let {data} = this.state;

@@ -1,6 +1,8 @@
 // @flow
 import React, {Component} from 'react';
 import {AsyncStorage, View, StyleSheet} from 'react-native';
+
+//$FlowFixMe
 import {NavigationActions} from 'react-navigation';
 import {Text} from '../../components/CoreComponents';
 import {baseColors} from '../../constants/colors';
