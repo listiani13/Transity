@@ -58,8 +58,6 @@ export default class RouteScene extends Component<Props, State> {
   };
 
   componentDidMount() {
-    console.log('route scene');
-
     this._getInitialState();
   }
 
@@ -84,11 +82,14 @@ export default class RouteScene extends Component<Props, State> {
       let data = await fetch(
         `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
       );
+      console.log('data', data);
+
       let jsonData = await data.json();
+
       let destination = jsonData.destination;
       let destDesc: RouteData = [];
       let idxTravelDistance = 0;
-      destination = destination.map((val, idx) => {
+      destination.map((val, idx) => {
         idxTravelDistance = idx - 1;
         if (idx === 0) {
           destDesc.push({
@@ -108,6 +109,7 @@ export default class RouteScene extends Component<Props, State> {
         this.setState({isLoading: false, destination: destDesc});
       }, 500);
     } catch (error) {
+      console.log('error routeScene', error);
       this._displayErrorMessage('Error Occured', error.message);
     }
   };
@@ -156,6 +158,7 @@ export default class RouteScene extends Component<Props, State> {
     let {destination, tripName, tripDate} = this.state;
     try {
       let currDest = await AsyncStorage.getItem('myTrip');
+      let currentUsername = await AsyncStorage.getItem('username');
       if (currDest != null) {
         currDest = JSON.parse(currDest);
       } else {
@@ -166,9 +169,18 @@ export default class RouteScene extends Component<Props, State> {
         date: tripDate,
         route: destination,
       });
-      // await AsyncStorage.removeItem('myTrip');
-      await AsyncStorage.setItem('myTrip', JSON.stringify(currDest));
-      this.props.navigation.navigate('HomeScene');
+      let updateToDB = await fetch(`${SERVER_NAME}/user/update_routeList.php`, {
+        method: 'POST',
+        body: JSON.stringify({
+          username: currentUsername,
+          routeList: JSON.stringify(currDest),
+        }),
+      });
+      let statusUpdate = await updateToDB.json();
+      if (statusUpdate.status === 'OK') {
+        await AsyncStorage.setItem('myTrip', JSON.stringify(currDest));
+        this.props.navigation.navigate('HomeScene');
+      }
     } catch (error) {}
   };
 

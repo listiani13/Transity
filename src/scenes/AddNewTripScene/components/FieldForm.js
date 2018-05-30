@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TextInput,
   View,
+  Picker,
 } from 'react-native';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import {Entypo} from '@expo/vector-icons';
@@ -47,6 +48,12 @@ type Props =
       numDest: number,
       increaseNumDest: Function,
       decreaseNumDest: Function,
+    }
+  | {
+      index: string,
+      type: 'DROPDOWN',
+      onValueChange: Function,
+      selectedValue: string,
     };
 export default function FieldForm(props: Props) {
   let {index} = props;
@@ -150,6 +157,23 @@ export default function FieldForm(props: Props) {
             </TouchableOpacity>
           </View>
         </View>
+      </View>
+    );
+  }
+  if (props.type === 'DROPDOWN') {
+    inputField = (
+      <View style={styles.inputContainer}>
+        <View style={styles.lblTripNameContainer}>
+          <Text style={styles.lblTripName}>Origin:</Text>
+        </View>
+        <Picker
+          selectedValue={props.selectedValue}
+          style={{height: 50}}
+          onValueChange={props.onValueChange}
+        >
+          <Picker.Item label="Ngurah Rai" value="ngurah_rai" />
+          <Picker.Item label="Current Location" value="current_location" />
+        </Picker>
       </View>
     );
   }

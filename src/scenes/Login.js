@@ -28,9 +28,21 @@ type State = {
 export default class Login extends Component<Props, State> {
   state = {username: '', password: '', isLoading: false};
   _displayErrorMessage = (title: string, message: string) => {
-    Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
-      cancelable: false,
-    });
+    Alert.alert(
+      title,
+      message,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            this.setState({isLoading: false});
+          },
+        },
+      ],
+      {
+        cancelable: false,
+      },
+    );
   };
   _getLoginData = async () => {
     let {username, password} = this.state;
@@ -46,8 +58,11 @@ export default class Login extends Component<Props, State> {
         body: JSON.stringify(body),
       });
       let jsonData = await data.json();
+      console.log('jsonData', jsonData);
+
       if (jsonData.status === 'OK') {
         await AsyncStorage.setItem('username', username);
+        await AsyncStorage.setItem('myTrip', jsonData.routeList);
         this._resetAction();
       } else {
         this._displayErrorMessage(

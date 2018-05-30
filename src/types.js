@@ -15,8 +15,11 @@ export type TripDatum = {
 };
 
 export type TripDB = {
-  name: string,
-  date: string,
-  route: RouteData,
+  username: string,
+  routeData: {
+    name: string,
+    date: string,
+    routeList: RouteData,
+  },
 };
 export type DataTripDB = Array<TripDB>;

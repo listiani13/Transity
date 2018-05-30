@@ -1,6 +1,6 @@
 // @flow
 import React, {Component} from 'react';
-import {Alert, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Alert, StyleSheet, TouchableOpacity, View, Picker} from 'react-native';
 
 import {Ionicons} from '@expo/vector-icons';
 
@@ -19,6 +19,7 @@ type State = {
   tripDescription: string,
   isDatePickerVisible: boolean,
   isLoading: boolean,
+  selectedValue: '',
 };
 const VELOCITY = 40;
 export default class AddNewTrip extends Component<Props, State> {
@@ -30,6 +31,7 @@ export default class AddNewTrip extends Component<Props, State> {
     tripDescription: '',
     isDatePickerVisible: false,
     isLoading: false,
+    selectedValue: '',
   };
 
   static navigationOptions: ({navigation: NavigationObject}) => Object = ({
@@ -56,6 +58,9 @@ export default class AddNewTrip extends Component<Props, State> {
   };
   _getRoute = async () => {
     let {availTime, numDest, tripName, tripDate} = this.state;
+
+    console.log('this state', this.state);
+    
 
     if (tripName !== '' && tripDate !== '') {
       try {
@@ -92,6 +97,8 @@ export default class AddNewTrip extends Component<Props, State> {
           tripDate,
         });
       } catch (error) {
+        console.log('error', error);
+
         this._displayErrorMessage('Error Occured', error.message);
       }
     } else {
@@ -181,6 +188,12 @@ export default class AddNewTrip extends Component<Props, State> {
             numDest={this.state.numDest}
             increaseNumDest={this._increaseNumDest}
             decreaseNumDest={this._decreaseNumDest}
+          />
+          <FieldForm
+            index="5"
+            type="DROPDOWN"
+            onValueChange={(val) => this._onChangeText(val, 'selectedValue')}
+            selectedValue={this.state.selectedValue}
           />
         </View>
 

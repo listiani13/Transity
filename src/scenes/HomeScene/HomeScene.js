@@ -84,7 +84,6 @@ export default class HomeScene extends Component<Props, State> {
     };
   };
   componentDidMount() {
-    console.log('did mount');
     InteractionManager.runAfterInteractions(() => {
       this.props.navigation.setParams({logout: this._logout});
     });
@@ -94,7 +93,7 @@ export default class HomeScene extends Component<Props, State> {
   _logout = () => {
     AsyncStorage.getItem('username').then((data) => {
       if (data != null) {
-        AsyncStorage.removeItem('username').then((error) => {
+        AsyncStorage.multiRemove(['username', 'myTrip']).then((error) => {
           if (error == null) {
             const resetAction = NavigationActions.reset({
               index: 0,
@@ -136,7 +135,6 @@ export default class HomeScene extends Component<Props, State> {
   //   });
   // };
   _getInitialState = async () => {
-    console.log('getInitialState');
     // this.props.navigation.setParams({logout: this._logout});
     let myTrip = await AsyncStorage.getItem('myTrip');
     if (myTrip != null) {
@@ -164,7 +162,7 @@ export default class HomeScene extends Component<Props, State> {
         datum.isOpen = !datum.isOpen;
       }
     }
-    this.setState({data: newData}, console.log('newData', newData));
+    this.setState({data: newData});
   };
   render() {
     let {data} = this.state;
