@@ -8,13 +8,15 @@ import {
   View,
   FlatList,
 } from 'react-native';
+// $FlowFixMe
+import {NavigationActions} from 'react-navigation';
 import {Loading, Text} from '../../components/CoreComponents';
 import Destination from '../components/Destination';
 import {baseColors} from '../../constants/colors';
 import {Ionicons} from '@expo/vector-icons';
 import {SERVER_NAME} from '../../data/config';
 
-import type {RouteData, DataTripDB} from '../../types';
+import type {RouteData} from '../../types';
 type Props = {
   navigation: NavigationObject,
 };
@@ -26,7 +28,7 @@ type State = {
 };
 const VELOCITY = 40;
 export default class RouteScene extends Component<Props, State> {
-  static navigationOptions = ({navigation}) => {
+  static navigationOptions: NavigationOptions = ({navigation}) => {
     const {params = {}} = navigation.state;
     return {
       headerTitle: 'My Trips',
@@ -82,10 +84,7 @@ export default class RouteScene extends Component<Props, State> {
       let data = await fetch(
         `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
       );
-      console.log('data', data);
-
       let jsonData = await data.json();
-
       let destination = jsonData.destination;
       let destDesc: RouteData = [];
       let idxTravelDistance = 0;
@@ -109,7 +108,6 @@ export default class RouteScene extends Component<Props, State> {
         this.setState({isLoading: false, destination: destDesc});
       }, 500);
     } catch (error) {
-      console.log('error routeScene', error);
       this._displayErrorMessage('Error Occured', error.message);
     }
   };
@@ -153,7 +151,13 @@ export default class RouteScene extends Component<Props, State> {
       />
     );
   };
-
+  _resetAction = () => {
+    const resetAction = NavigationActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({routeName: 'HomeScene'})],
+    });
+    this.props.navigation.dispatch(resetAction);
+  };
   _saveTrip = async () => {
     let {destination, tripName, tripDate} = this.state;
     try {
@@ -179,7 +183,7 @@ export default class RouteScene extends Component<Props, State> {
       let statusUpdate = await updateToDB.json();
       if (statusUpdate.status === 'OK') {
         await AsyncStorage.setItem('myTrip', JSON.stringify(currDest));
-        this.props.navigation.navigate('HomeScene');
+        this._resetAction();
       }
     } catch (error) {}
   };
