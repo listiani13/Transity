@@ -1,11 +1,11 @@
 // @flow
 import React, {Component} from 'react';
-import {Alert, StyleSheet, TouchableOpacity, View, Picker} from 'react-native';
+import {Alert, StyleSheet, TouchableOpacity, View} from 'react-native';
 
 import {Ionicons} from '@expo/vector-icons';
 
 import FieldForm from './components/FieldForm';
-import {Text, Loading} from '../../components/CoreComponents';
+import {Text} from '../../components/CoreComponents';
 import sprintf from '../../helpers/sprintf';
 import {SERVER_NAME} from '../../data/config';
 type Props = {
@@ -57,16 +57,17 @@ export default class AddNewTrip extends Component<Props, State> {
     };
   };
   _getRoute = async () => {
-    let {availTime, numDest, tripName, tripDate} = this.state;
-
-    console.log('this state', this.state);
-    
-
+    let {availTime, numDest, tripName, tripDate, selectedValue} = this.state;
     if (tripName !== '' && tripDate !== '') {
       try {
         this.setState({isLoading: true});
+        let latlng = '';
+        if (selectedValue === 'current_location') {
+          // TODO: Get position from GPS
+          latlng = '&lat=-8.634864&lang=115.192476';
+        }
         let data = await fetch(
-          `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
+          `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}${latlng}`,
         );
         let jsonData = await data.json();
         let destination = jsonData.destination;
@@ -97,8 +98,6 @@ export default class AddNewTrip extends Component<Props, State> {
           tripDate,
         });
       } catch (error) {
-        console.log('error', error);
-
         this._displayErrorMessage('Error Occured', error.message);
       }
     } else {
