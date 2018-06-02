@@ -10,14 +10,15 @@ import type {Node} from 'react';
 
 type OnPressFunc = (param?: mixed) => void;
 type Props = {
-  size?: 'DEFAULT'
+  size?: | 'DEFAULT'
     | 'EXTRA_SMALL'
     | 'SMALL'
     | 'MEDIUM'
     | 'LARGE'
     | 'EXTRA_LARGE'
     | 'POINTER'
-    | 'YEAR',
+    | 'YEAR'
+    | 'HEADING1',
   bold?: boolean,
   children?: Node,
   color?: string,
