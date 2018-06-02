@@ -58,6 +58,8 @@ type Props =
 export default function FieldForm(props: Props) {
   let {index} = props;
   let inputField = <View />;
+  let today = new Date();
+
   if (props.type === 'TEXT_INPUT') {
     let {placeholder} = props;
     inputField = (
@@ -100,6 +102,7 @@ export default function FieldForm(props: Props) {
             isVisible={isVisible}
             onConfirm={(date) => onConfirm(date)}
             onCancel={onCancel}
+            minimumDate={today}
           />
         </View>
       </View>
