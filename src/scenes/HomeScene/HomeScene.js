@@ -1,40 +1,28 @@
 // @flow
 
 import React, {Component} from 'react';
-import {AsyncStorage, View, StyleSheet, ScrollView} from 'react-native';
-import {SimpleLineIcons} from '@expo/vector-icons';
 import {
-  MenuContext,
-  Menu,
-  MenuOptions,
-  MenuOption,
-  MenuTrigger,
-} from 'react-native-popup-menu';
+  AsyncStorage,
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  InteractionManager,
+} from 'react-native';
 // $FlowFixMe
 import {NavigationActions} from 'react-navigation';
+import {Text} from '../../components/CoreComponents';
 import FloatingButton from './components/FloatingButton';
 import Trip from './components/Trip';
 
 import {baseColors, BACKGROUND_GREY} from '../../constants/colors';
-import {baseTextStyle} from '../../constants/text';
+
+import type {TripDatum} from '../../types';
 
 type Props = {
   navigation: NavigationObject,
 };
 
-type DestDatum = {
-  placeName: string,
-  placeDesc: string,
-  travelTime?: string,
-};
-export type RouteData = Array<DestDatum>;
-type TripDatum = {
-  id: string,
-  title: string,
-  isOpen: boolean,
-  sight: number,
-  route: RouteData,
-};
 type State = {
   data: Array<TripDatum>,
 };
@@ -42,7 +30,9 @@ type State = {
 const PADDING_HORIZONTAL = 10;
 
 export default class HomeScene extends Component<Props, State> {
-  static navigationOptions = ({navigation}) => {
+  static navigationOptions: ({navigation: NavigationObject}) => Object = ({
+    navigation,
+  }) => {
     const {params = {}} = navigation.state;
     return {
       headerTitle: 'My Trips',
@@ -53,42 +43,25 @@ export default class HomeScene extends Component<Props, State> {
       },
       headerTintColor: 'white',
       headerRight: (
-        <MenuContext
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: PADDING_HORIZONTAL,
-          }}
-        >
-          <View>
-            <Menu style={{zIndex: 99}}>
-              <MenuTrigger style={{zIndex: 99}}>
-                <View style={{width: 80, alignItems: 'flex-end'}}>
-                  <SimpleLineIcons
-                    name="options-vertical"
-                    size={baseTextStyle.LARGE_FONT_SIZE}
-                    color={baseColors.white}
-                  />
-                </View>
-              </MenuTrigger>
-              <MenuOptions style={{zIndex: 99}}>
-                <MenuOption onSelect={params.logout} text="Log Out" />
-              </MenuOptions>
-            </Menu>
-          </View>
-        </MenuContext>
+        <View>
+          <TouchableOpacity onPress={params.logout}>
+            <Text style={{color: 'white'}}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
       ),
     };
   };
   componentDidMount() {
-    this.props.navigation.setParams({logout: this._logout});
+    InteractionManager.runAfterInteractions(() => {
+      this.props.navigation.setParams({logout: this._logout});
+    });
+    this._getInitialState();
   }
 
   _logout = () => {
     AsyncStorage.getItem('username').then((data) => {
       if (data != null) {
-        AsyncStorage.removeItem('username').then((error) => {
+        AsyncStorage.multiRemove(['username', 'myTrip']).then((error) => {
           if (error == null) {
             const resetAction = NavigationActions.reset({
               index: 0,
@@ -104,42 +77,39 @@ export default class HomeScene extends Component<Props, State> {
       }
     });
   };
+
   state = {
-    data: [
-      {
-        id: '201',
-        title: 'Trip dari mata turun ke hati',
-        sight: 2,
+    data: [],
+  };
+
+  _getInitialState = async () => {
+    // this.props.navigation.setParams({logout: this._logout});
+    let myTrip = await AsyncStorage.getItem('myTrip');
+    if (myTrip != null) {
+      myTrip = JSON.parse(myTrip);
+    } else {
+      myTrip = [];
+    }
+    let newTrip: Array<TripDatum> = myTrip.map((data, index) => {
+      return {
+        id: index.toString(),
+        title: data.name,
         isOpen: false,
-        route: [
-          {placeName: 'Ngurah Rai', placeDesc: 'Starting Point'},
-          {placeName: 'Taman Ayun', placeDesc: 'Nice', travelTime: '20 mins'},
-          {placeName: 'Tanah Lot', placeDesc: '', travelTime: '70 mins'},
-          {placeName: 'Ngurah Rai', placeDesc: '', travelTime: '80 mins'},
-        ],
-      },
-      {
-        id: '202',
-        title: 'Choi Seung Hyun',
-        sight: 1,
-        isOpen: false,
-        route: [
-          {placeName: 'Ngurah Rai', placeDesc: 'Starting Point'},
-          {placeName: 'Taman Ayun', placeDesc: 'Nice', travelTime: '20 mins'},
-          {placeName: 'Ngurah Rai', placeDesc: '', travelTime: '80 mins'},
-        ],
-      },
-    ],
+        sight: data.route.length,
+        route: data.route,
+      };
+    });
+    this.setState({data: newTrip});
   };
 
   _onToggleRoute = (id) => {
-    let newData = [...this.state.data];
+    let {data} = this.state;
+    let newData = [...data];
     for (let datum of newData) {
       if (datum.id === id) {
         datum.isOpen = !datum.isOpen;
       }
     }
-
     this.setState({data: newData});
   };
   render() {
@@ -147,18 +117,21 @@ export default class HomeScene extends Component<Props, State> {
     return (
       <View style={styles.container}>
         <ScrollView width="100%" contentContainerStyle={{padding: 10}}>
-          {data.map((item, id) => {
-            return (
-              <Trip
-                key={id}
-                title={item.title}
-                sights={item.sight}
-                isOpen={item.isOpen}
-                onToggleRoute={() => this._onToggleRoute(item.id)}
-                routeData={item.route}
-              />
-            );
-          })}
+          {data
+            .slice(0)
+            .reverse()
+            .map((item, id) => {
+              return (
+                <Trip
+                  key={id}
+                  title={item.title}
+                  sights={item.sight}
+                  isOpen={item.isOpen}
+                  onToggleRoute={() => this._onToggleRoute(item.id)}
+                  routeData={item.route}
+                />
+              );
+            })}
         </ScrollView>
         <FloatingButton
           onPress={() => this.props.navigation.navigate('AddNewTrip')}

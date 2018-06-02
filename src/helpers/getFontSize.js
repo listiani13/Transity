@@ -16,6 +16,8 @@ export default function getFontSize(size?: string) {
       return baseTextStyle.LARGE_FONT_SIZE;
     case 'EXTRA_LARGE':
       return baseTextStyle.EXTRA_LARGE_FONT_SIZE;
+    case 'HEADING1':
+      return baseTextStyle.HEADING1_SIZE;
     case 'YEAR':
       return YEAR_FONT_SIZE;
     case 'POINTER':

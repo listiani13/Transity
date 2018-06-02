@@ -8,7 +8,7 @@ import {baseTextStyle} from '../../../constants/text';
 import {baseColors} from '../../../constants/colors';
 import Destination from './Destination';
 
-import type {RouteData} from '../HomeScene';
+import type {RouteData} from '../../../types';
 type Props = {
   title: string,
   sights: string | number,

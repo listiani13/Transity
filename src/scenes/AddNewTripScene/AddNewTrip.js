@@ -1,11 +1,13 @@
 // @flow
 import React, {Component} from 'react';
-import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, StyleSheet, TouchableOpacity, View} from 'react-native';
 
 import {Ionicons} from '@expo/vector-icons';
 
 import FieldForm from './components/FieldForm';
+import {Text} from '../../components/CoreComponents';
 import sprintf from '../../helpers/sprintf';
+import {SERVER_NAME} from '../../data/config';
 type Props = {
   navigation: Navigation,
 };
@@ -16,7 +18,10 @@ type State = {
   numDest: number,
   tripDescription: string,
   isDatePickerVisible: boolean,
+  isLoading: boolean,
+  selectedValue: '',
 };
+const VELOCITY = 40;
 export default class AddNewTrip extends Component<Props, State> {
   state: State = {
     tripName: '',
@@ -25,8 +30,13 @@ export default class AddNewTrip extends Component<Props, State> {
     numDest: 1,
     tripDescription: '',
     isDatePickerVisible: false,
+    isLoading: false,
+    selectedValue: '',
   };
-  static navigationOptions = ({navigation}) => {
+
+  static navigationOptions: ({navigation: NavigationObject}) => Object = ({
+    navigation,
+  }) => {
     return {
       headerTitle: 'Trip Details',
       headerLeft: (
@@ -47,16 +57,41 @@ export default class AddNewTrip extends Component<Props, State> {
     };
   };
   _getRoute = async () => {
-    let {availTime, numDest, tripName, tripDate, tripDescription} = this.state;
-    if (tripName !== '' && tripDate !== '' && tripDescription !== '') {
+    let {availTime, numDest, tripName, tripDate, selectedValue} = this.state;
+    if (tripName !== '' && tripDate !== '') {
       try {
+        this.setState({isLoading: true});
+        let latlng = '';
+        if (selectedValue === 'current_location') {
+          // TODO: Get position from GPS
+          latlng = '&lat=-8.634864&lang=115.192476';
+        }
         let data = await fetch(
-          `http://localhost/ga_test/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
+          `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}${latlng}`,
         );
         let jsonData = await data.json();
-        let destination = jsonData[1].destinasi;
+        let destination = jsonData.destination;
+        let destDesc = [];
+        let idxTravelDistance = 0;
+        destination.map((val, idx) => {
+          idxTravelDistance = idx - 1;
+          if (idx === 0) {
+            destDesc.push({
+              placeName: val,
+              placeDesc: 'Starting Point',
+              travelTime: null,
+            });
+          } else {
+            destDesc.push({
+              placeName: val,
+              placeDesc: jsonData.travel_distance[idxTravelDistance] + ' km',
+              travelTime:
+                jsonData.travel_distance[idxTravelDistance] / VELOCITY * 60,
+            });
+          }
+        });
         this.props.navigation.navigate('RouteScene', {
-          destination,
+          destination: destDesc,
           availTime,
           numDest,
           tripName,
@@ -74,9 +109,8 @@ export default class AddNewTrip extends Component<Props, State> {
       cancelable: false,
     });
   };
-  _onEndEditing = (event, inputName) => {
-    let text = event.nativeEvent.text;
-    this.setState({[inputName]: text});
+  _onChangeText = (val, inputName) => {
+    this.setState({[inputName]: val});
   };
   _showDateTimePicker = () =>
     this.setState({
@@ -89,9 +123,11 @@ export default class AddNewTrip extends Component<Props, State> {
     });
 
   _handleDatePicked = (date) => {
-    let month = sprintf(date.getMonth().toString());
-    let day = sprintf(date.getDay().toString());
+    let monthNo = date.getMonth() + 1;
+    let month = sprintf(monthNo.toString());
+    let day = sprintf(date.getDate().toString());
     let year = date.getFullYear();
+
     let newDateString = day + '/' + month + '/' + year;
 
     this.setState({tripDate: newDateString});
@@ -120,8 +156,8 @@ export default class AddNewTrip extends Component<Props, State> {
             index="1"
             type="TEXT_INPUT"
             placeholder="Trip Name"
-            onEndEditing={(event) => {
-              this._onEndEditing(event, 'tripName');
+            onChangeText={(text) => {
+              this._onChangeText(text, 'tripName');
             }}
           />
           <FieldForm
@@ -151,6 +187,12 @@ export default class AddNewTrip extends Component<Props, State> {
             numDest={this.state.numDest}
             increaseNumDest={this._increaseNumDest}
             decreaseNumDest={this._decreaseNumDest}
+          />
+          <FieldForm
+            index="5"
+            type="DROPDOWN"
+            onValueChange={(val) => this._onChangeText(val, 'selectedValue')}
+            selectedValue={this.state.selectedValue}
           />
         </View>
 

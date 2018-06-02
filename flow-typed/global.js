@@ -55,3 +55,5 @@ declare type NavigationObject = Navigation & {
   dispatch: Dispatch,
   index: number,
 };
+
+declare type NavigationOptions = ({navigation: NavigationObject}) => ?Object;

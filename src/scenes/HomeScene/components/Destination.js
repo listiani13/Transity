@@ -11,7 +11,7 @@ type Props = {
   id: number,
   placeName: string,
   placeDesc: string,
-  travelTime?: string,
+  travelTime?: ?number,
 };
 const WIDTH = 20;
 const MARGIN_RIGHT = 10;
@@ -31,7 +31,7 @@ export default function Destination(props: Props) {
             size={baseTextStyle.DEFAULT_FONT_SIZE}
             style={{marginRight: MARGIN_RIGHT / 2}}
           />
-          <Text size="SMALL">20 mins</Text>
+          <Text size="SMALL">{travelTime.toFixed() + ' min'}</Text>
         </View>
       ) : (
         <View />

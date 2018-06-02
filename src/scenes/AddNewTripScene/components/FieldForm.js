@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TextInput,
   View,
+  Picker,
 } from 'react-native';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import {Entypo} from '@expo/vector-icons';
@@ -18,7 +19,7 @@ type Props =
       index: string,
       type: 'TEXT_INPUT',
       placeholder?: string,
-      onEndEditing?: Function,
+      onChangeText?: Function,
     }
   | {
       index: string,
@@ -47,10 +48,18 @@ type Props =
       numDest: number,
       increaseNumDest: Function,
       decreaseNumDest: Function,
+    }
+  | {
+      index: string,
+      type: 'DROPDOWN',
+      onValueChange: Function,
+      selectedValue: string,
     };
 export default function FieldForm(props: Props) {
   let {index} = props;
   let inputField = <View />;
+  let today = new Date();
+
   if (props.type === 'TEXT_INPUT') {
     let {placeholder} = props;
     inputField = (
@@ -62,7 +71,7 @@ export default function FieldForm(props: Props) {
           <TextInput
             placeholder={placeholder}
             style={styles.txtInputTripName}
-            onEndEditing={props.onEndEditing}
+            onChangeText={props.onChangeText}
             autoCorrect={false}
             underlineColorAndroid="transparent"
           />
@@ -91,8 +100,9 @@ export default function FieldForm(props: Props) {
           </TouchableOpacity>
           <DateTimePicker
             isVisible={isVisible}
-            onConfirm={onConfirm}
+            onConfirm={(date) => onConfirm(date)}
             onCancel={onCancel}
+            minimumDate={today}
           />
         </View>
       </View>
@@ -150,6 +160,23 @@ export default function FieldForm(props: Props) {
             </TouchableOpacity>
           </View>
         </View>
+      </View>
+    );
+  }
+  if (props.type === 'DROPDOWN') {
+    inputField = (
+      <View style={styles.inputContainer}>
+        <View style={styles.lblTripNameContainer}>
+          <Text style={styles.lblTripName}>Origin:</Text>
+        </View>
+        <Picker
+          selectedValue={props.selectedValue}
+          style={{height: 50}}
+          onValueChange={props.onValueChange}
+        >
+          <Picker.Item label="Ngurah Rai" value="ngurah_rai" />
+          <Picker.Item label="Current Location" value="current_location" />
+        </Picker>
       </View>
     );
   }

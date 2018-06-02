@@ -2,6 +2,7 @@
 import React, {Component} from 'react';
 import {
   Alert,
+  ActivityIndicator,
   AsyncStorage,
   Image,
   StyleSheet,
@@ -12,6 +13,7 @@ import {
 // $FlowFixMe
 import {NavigationActions} from 'react-navigation';
 import Button from '../components/button';
+import {Loading} from '../components/CoreComponents';
 import {SERVER_NAME} from '../data/config';
 
 type Props = {
@@ -20,21 +22,35 @@ type Props = {
 type State = {
   username: string,
   password: string,
+  isLoading: boolean,
 };
 
 export default class Login extends Component<Props, State> {
-  state = {username: '', password: ''};
+  state = {username: '', password: '', isLoading: false};
   _displayErrorMessage = (title: string, message: string) => {
-    Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
-      cancelable: false,
-    });
+    Alert.alert(
+      title,
+      message,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            this.setState({isLoading: false});
+          },
+        },
+      ],
+      {
+        cancelable: false,
+      },
+    );
   };
   _getLoginData = async () => {
     let {username, password} = this.state;
     let body = {username, password};
 
     try {
-      let data = await fetch('http://192.168.0.12/transity_backend/Login.php', {
+      this.setState({isLoading: true});
+      let data = await fetch(`${SERVER_NAME}/Login.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,8 +58,11 @@ export default class Login extends Component<Props, State> {
         body: JSON.stringify(body),
       });
       let jsonData = await data.json();
+      console.log('jsonData', jsonData);
+
       if (jsonData.status === 'OK') {
         await AsyncStorage.setItem('username', username);
+        await AsyncStorage.setItem('myTrip', jsonData.routeList);
         this._resetAction();
       } else {
         this._displayErrorMessage(
@@ -52,7 +71,7 @@ export default class Login extends Component<Props, State> {
         );
       }
     } catch (error) {
-      console.log('error', error);
+      this._displayErrorMessage('Login Failed', error.message);
     }
   };
   _resetAction = () => {
@@ -67,6 +86,11 @@ export default class Login extends Component<Props, State> {
     this.setState({[inputName]: val});
   };
   render() {
+    let loading;
+    if (this.state.isLoading === true) {
+      loading = <Loading />;
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.head}>
@@ -102,6 +126,7 @@ export default class Login extends Component<Props, State> {
             right: 0,
           }}
         />
+        {loading}
       </View>
     );
   }
