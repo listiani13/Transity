@@ -1,11 +1,12 @@
 // @flow
 import React, {Component} from 'react';
-import {AsyncStorage, View, StyleSheet} from 'react-native';
+import {AsyncStorage, View, StyleSheet, Image} from 'react-native';
 
 //$FlowFixMe
 import {NavigationActions} from 'react-navigation';
 import {Text} from '../../components/CoreComponents';
 import {baseColors} from '../../constants/colors';
+import travelPicture from '../../assets/planet-earth.png';
 
 type Props = {
   navigation: NavigationObject,
@@ -33,13 +34,18 @@ export default class SplashScene extends Component<Props, State> {
         }),
       ],
     });
-    this.props.navigation.dispatch(resetAction);
+    setTimeout(() => this.props.navigation.dispatch(resetAction), 1000);
   };
 
   render() {
     return (
       <View style={styles.container}>
-        <Text size="EXTRA_LARGE" color={baseColors.white}>
+        <Image source={travelPicture} />
+        <Text
+          size="HEADING1"
+          color={baseColors.white}
+          style={{marginTop: 5, fontSize: 60}}
+        >
           TRANSITY
         </Text>
       </View>
