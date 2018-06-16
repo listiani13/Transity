@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Your App Name",
+    "name": "Transity",
     "icon": "./src/assets/planet-earth.png",
     "version": "1.0.0",
     "slug": "your-app-slug",
