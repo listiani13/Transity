@@ -2,6 +2,7 @@
 import React, {Component} from 'react';
 import {
   AsyncStorage,
+  Alert,
   View,
   StyleSheet,
   ScrollView,
@@ -77,6 +78,39 @@ export default class AdminHomeScene extends Component<Props, State> {
     let place = mapPlaces.get(destID);
     this.props.navigation.navigate('AddNewPlaceScene', {place});
   };
+  _deleteItem = async (destID: string) => {
+    let raw = await fetch(`${SERVER_NAME}/admin/delete_destinations.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({dest_id: destID}),
+    });
+    let status = await raw.json();
+
+    if (status.status === 'OK') {
+      this._getInitialState();
+    }
+  };
+  _onDeletePress = (destID: string) => {
+    Alert.alert(
+      'Confirmation',
+      'Are you sure you want to delete this destination?',
+      [
+        {
+          text: 'Yes',
+          onPress: () => this._deleteItem(destID),
+        },
+        {
+          text: 'No',
+          onPress: () => {},
+        },
+      ],
+      {
+        cancelable: false,
+      },
+    );
+  };
   componentDidMount = () => {
     InteractionManager.runAfterInteractions(() => {
       this.props.navigation.setParams({logout: this._logout});
@@ -119,7 +153,7 @@ export default class AdminHomeScene extends Component<Props, State> {
                     destName={data.destName}
                     key={data.destID}
                     onDeletePress={() => {
-                      this._onEditPress(data.destID);
+                      this._onDeletePress(data.destID);
                     }}
                     onEditPress={() => {
                       this._onEditPress(data.destID);

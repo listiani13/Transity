@@ -5,7 +5,6 @@ import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import {NavigationActions} from 'react-navigation';
 import {Text, Loading} from '../../components/CoreComponents';
 import FieldForm from '../../components/FieldForm';
-import type {Place} from './AdminHomeScene';
 import {SERVER_NAME} from '../../data/config';
 
 type Props = {
