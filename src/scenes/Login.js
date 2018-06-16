@@ -2,7 +2,6 @@
 import React, {Component} from 'react';
 import {
   Alert,
-  ActivityIndicator,
   AsyncStorage,
   Image,
   StyleSheet,
@@ -58,12 +57,14 @@ export default class Login extends Component<Props, State> {
         body: JSON.stringify(body),
       });
       let jsonData = await data.json();
-      console.log('jsonData', jsonData);
 
       if (jsonData.status === 'OK') {
         await AsyncStorage.setItem('username', username);
+        await AsyncStorage.setItem('role', jsonData.role);
         await AsyncStorage.setItem('myTrip', jsonData.routeList);
-        this._resetAction();
+        jsonData.role === 'USER'
+          ? this._resetAction('HomeScene')
+          : this._resetAction('AdminHomeScene');
       } else {
         this._displayErrorMessage(
           'Login Failed',
@@ -74,10 +75,10 @@ export default class Login extends Component<Props, State> {
       this._displayErrorMessage('Login Failed', error.message);
     }
   };
-  _resetAction = () => {
+  _resetAction = (routeName: string) => {
     const resetAction = NavigationActions.reset({
       index: 0,
-      actions: [NavigationActions.navigate({routeName: 'HomeScene'})],
+      actions: [NavigationActions.navigate({routeName})],
     });
     this.props.navigation.dispatch(resetAction);
   };
