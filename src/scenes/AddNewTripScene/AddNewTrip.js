@@ -19,7 +19,9 @@ type State = {
   tripDescription: string,
   isDatePickerVisible: boolean,
   isLoading: boolean,
-  selectedValue: '',
+  selectedValue: string,
+  startingTime: string,
+  isStartingTimeVisible: boolean,
 };
 const VELOCITY = 40;
 export default class AddNewTrip extends Component<Props, State> {
@@ -32,6 +34,8 @@ export default class AddNewTrip extends Component<Props, State> {
     isDatePickerVisible: false,
     isLoading: false,
     selectedValue: '',
+    startingTime: '',
+    isStartingTimeVisible: false,
   };
 
   static navigationOptions: ({navigation: NavigationObject}) => Object = ({
@@ -57,7 +61,15 @@ export default class AddNewTrip extends Component<Props, State> {
     };
   };
   _getRoute = async () => {
-    let {availTime, numDest, tripName, tripDate, selectedValue} = this.state;
+    let {
+      availTime,
+      numDest,
+      tripName,
+      tripDate,
+      selectedValue,
+      startingTime,
+    } = this.state;
+
     if (tripName !== '' && tripDate !== '') {
       try {
         this.setState({isLoading: true});
@@ -67,7 +79,7 @@ export default class AddNewTrip extends Component<Props, State> {
           latlng = '&lat=-8.634864&lang=115.192476';
         }
         let data = await fetch(
-          `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}${latlng}&startTime=12:00`,
+          `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}${latlng}&startTime=${startingTime}`,
         );
         let jsonData = await data.json();
         let destination = jsonData.destination;
@@ -112,26 +124,33 @@ export default class AddNewTrip extends Component<Props, State> {
   _onChangeText = (val, inputName) => {
     this.setState({[inputName]: val});
   };
-  _showDateTimePicker = () =>
+  _showDateTimePicker = (inputName) =>
     this.setState({
-      isDatePickerVisible: true,
+      [inputName]: true,
     });
 
-  _hideDateTimePicker = () =>
+  _hideDateTimePicker = (inputName: string) =>
     this.setState({
-      isDatePickerVisible: false,
+      [inputName]: false,
     });
 
-  _handleDatePicked = (date) => {
-    let monthNo = date.getMonth() + 1;
-    let month = sprintf(monthNo.toString());
-    let day = sprintf(date.getDate().toString());
-    let year = date.getFullYear();
+  _handleDatePicked = (date, fieldType: 'date' | 'time') => {
+    if (fieldType === 'date') {
+      let monthNo = date.getMonth() + 1;
+      let month = sprintf(monthNo.toString());
+      let day = sprintf(date.getDate().toString());
+      let year = date.getFullYear();
 
-    let newDateString = day + '/' + month + '/' + year;
-
-    this.setState({tripDate: newDateString});
-    this._hideDateTimePicker();
+      let newDateString = day + '/' + month + '/' + year;
+      this.setState({tripDate: newDateString});
+      this._hideDateTimePicker('isDatePickerVisible');
+    }
+    if (fieldType === 'time') {
+      let hour = sprintf(date.getHours());
+      let mins = sprintf(date.getMinutes());
+      this.setState({startingTime: hour + ':' + mins});
+      this._hideDateTimePicker('isStartingTimeVisible');
+    }
   };
   _decreaseNumDest = () => {
     if (this.state.numDest !== 1) {
@@ -148,7 +167,7 @@ export default class AddNewTrip extends Component<Props, State> {
     }
   };
   render() {
-    let {tripDate} = this.state;
+    let {tripDate, startingTime} = this.state;
     return (
       <View style={styles.container}>
         <View>
@@ -166,10 +185,12 @@ export default class AddNewTrip extends Component<Props, State> {
             type="DATETIMEPICKER"
             placeholder="Date"
             dateValue={tripDate}
-            showDateTimePicker={this._showDateTimePicker}
+            showDateTimePicker={() => {
+              this._showDateTimePicker('isDatePickerVisible');
+            }}
             isVisible={this.state.isDatePickerVisible}
-            onConfirm={this._handleDatePicked}
-            onCancel={this._hideDateTimePicker}
+            onConfirm={(date) => this._handleDatePicked(date, 'date')}
+            onCancel={() => this._hideDateTimePicker('isDatePickerVisible')}
           />
           <FieldForm
             index="3"
@@ -183,6 +204,22 @@ export default class AddNewTrip extends Component<Props, State> {
           />
           <FieldForm
             index="4"
+            title="Starting Time"
+            type="DATETIMEPICKER"
+            placeholder="Starting Time"
+            dateValue={startingTime}
+            showDateTimePicker={() => {
+              this._showDateTimePicker('isStartingTimeVisible');
+            }}
+            isVisible={this.state.isStartingTimeVisible}
+            onConfirm={(time) => this._handleDatePicked(time, 'time')}
+            onCancel={() => this._hideDateTimePicker('isStartingTimeVisible')}
+            mode="time"
+            is24Hour={false}
+            labelName="Closing Hours"
+          />
+          <FieldForm
+            index="5"
             type="INDECREASE"
             label="Numbers of Destination"
             numDest={this.state.numDest}
@@ -190,7 +227,7 @@ export default class AddNewTrip extends Component<Props, State> {
             decreaseNumDest={this._decreaseNumDest}
           />
           <FieldForm
-            index="5"
+            index="6"
             type="DROPDOWN"
             onValueChange={(val) => this._onChangeText(val, 'selectedValue')}
             selectedValue={this.state.selectedValue}
