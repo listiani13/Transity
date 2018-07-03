@@ -3,10 +3,10 @@
     "name": "Transity",
     "icon": "./src/assets/planet-earth.png",
     "version": "1.0.0",
-    "slug": "your-app-slug",
+    "slug": "transity",
     "sdkVersion": "25.0.0",
     "android": {
-      "package": "com.listi.transity"
+      "package": "com.llistiani.transity"
     }
   }
 }

@@ -2,6 +2,7 @@
 import {StackNavigator} from 'react-navigation';
 import AddNewTrip from './scenes/AddNewTripScene/AddNewTrip';
 import Login from './scenes/Login';
+import Register from './scenes/Register';
 import MyTrips from './scenes/MyTripsScene';
 import RouteScene from './scenes/RouteScene/RouteScene';
 import HomeScene from './scenes/HomeScene/HomeScene';
@@ -19,6 +20,12 @@ export default StackNavigator(
     },
     Login: {
       screen: Login,
+      navigationOptions: {
+        header: null,
+      },
+    },
+    Register: {
+      screen: Register,
       navigationOptions: {
         header: null,
       },

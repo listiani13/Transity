@@ -116,6 +116,11 @@ export default class Login extends Component<Props, State> {
             autoCapitalize={'none'}
           />
           <Button onPress={this._getLoginData} textVal="LOGIN" />
+          <Button
+            onPress={() => this.props.navigation.navigate('Register')}
+            textVal="REGISTER"
+            style={{marginTop: 10}}
+          />
         </View>
         <Image
           source={require('../img/login-plane.png')}

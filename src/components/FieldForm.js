@@ -25,13 +25,15 @@ type Props =
     }
   | {
       index: string,
-      type: 'DATEPICKER',
+      type: 'DATETIMEPICKER',
+      labelName?: string,
       dateValue?: string,
       placeholder?: string,
       showDateTimePicker: Function,
       isVisible: boolean,
       onConfirm: Function,
       onCancel: Function,
+      mode?: 'date' | 'time' | 'both',
     }
   | {
       index: string,
@@ -82,13 +84,22 @@ export default function FieldForm(props: Props) {
       </View>
     );
   }
-  if (props.type === 'DATEPICKER') {
+  if (props.type === 'DATETIMEPICKER') {
     let {placeholder} = props;
-    let {dateValue, showDateTimePicker, isVisible, onConfirm, onCancel} = props;
+    let {
+      dateValue,
+      showDateTimePicker,
+      isVisible,
+      onConfirm,
+      onCancel,
+      mode = 'date',
+      labelName = 'Date',
+      ...otherProps
+    } = props;
     inputField = (
       <View style={styles.inputContainer}>
         <View style={styles.lblTripNameContainer}>
-          <Text style={styles.lblTripName}>Date:</Text>
+          <Text style={styles.lblTripName}>{`${labelName}:`}</Text>
         </View>
         <View style={styles.txtInputTripNameContainer}>
           <TouchableOpacity onPress={showDateTimePicker}>
@@ -106,6 +117,8 @@ export default function FieldForm(props: Props) {
             onConfirm={(date) => onConfirm(date)}
             onCancel={onCancel}
             minimumDate={today}
+            mode={mode}
+            {...otherProps}
           />
         </View>
       </View>
