@@ -48,6 +48,7 @@ declare type Navigation = {
   navigate: NavigateFunction,
   setParams: (param: NavigationParams) => boolean,
   state: NavigationState,
+  getParam: (string, mixed) => ?mixed,
 };
 
 declare type NavigationObject = Navigation & {

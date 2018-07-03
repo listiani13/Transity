@@ -8,11 +8,12 @@ import {baseTextStyle} from '../constants/text';
 type Props = {
   onPress?: Function,
   textVal: string,
+  style?: StyleSet,
 };
 export default function Button(props: Props) {
-  let {textVal, onPress} = props;
+  let {textVal, onPress, style} = props;
   return (
-    <TouchableOpacity onPress={onPress} style={styles.btnLogin}>
+    <TouchableOpacity onPress={onPress} style={[styles.btnLogin, style]}>
       <View>
         <Text style={styles.txtLogin}>{textVal}</Text>
       </View>

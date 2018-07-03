@@ -1,5 +1,12 @@
 {
   "expo": {
-    "sdkVersion": "25.0.0"
+    "name": "Transity",
+    "icon": "./src/assets/planet-earth.png",
+    "version": "1.0.0",
+    "slug": "transity",
+    "sdkVersion": "25.0.0",
+    "android": {
+      "package": "com.llistiani.transity"
+    }
   }
 }

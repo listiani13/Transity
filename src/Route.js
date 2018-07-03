@@ -2,10 +2,13 @@
 import {StackNavigator} from 'react-navigation';
 import AddNewTrip from './scenes/AddNewTripScene/AddNewTrip';
 import Login from './scenes/Login';
+import Register from './scenes/Register';
 import MyTrips from './scenes/MyTripsScene';
 import RouteScene from './scenes/RouteScene/RouteScene';
 import HomeScene from './scenes/HomeScene/HomeScene';
 import SplashScene from './scenes/SplashScene/SplashScene';
+import AdminHomeScene from './scenes/AdminScenes/AdminHomeScene';
+import AddNewPlaceScene from './scenes/AdminScenes/AddNewPlaceScene';
 
 export default StackNavigator(
   {
@@ -21,10 +24,18 @@ export default StackNavigator(
         header: null,
       },
     },
+    Register: {
+      screen: Register,
+      navigationOptions: {
+        header: null,
+      },
+    },
     HomeScene: {screen: HomeScene},
     MyTrips: {screen: MyTrips},
     AddNewTrip: {screen: AddNewTrip},
     RouteScene: {screen: RouteScene},
+    AdminHomeScene: {screen: AdminHomeScene},
+    AddNewPlaceScene: {screen: AddNewPlaceScene},
   },
   {
     headerMode: 'screen',

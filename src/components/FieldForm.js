@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
-import {Text} from '../../../components/CoreComponents';
-import {baseColors} from '../../../constants/colors';
+import {Text} from './CoreComponents';
+import {baseColors} from '../constants/colors';
 import {
   TouchableOpacity,
   Slider,
@@ -12,24 +12,28 @@ import {
 } from 'react-native';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import {Entypo} from '@expo/vector-icons';
-import {baseTextStyle} from '../../../constants/text';
+import {baseTextStyle} from '../constants/text';
 
 type Props =
   | {
       index: string,
       type: 'TEXT_INPUT',
+      title: string,
       placeholder?: string,
       onChangeText?: Function,
+      value?: string,
     }
   | {
       index: string,
-      type: 'DATEPICKER',
+      type: 'DATETIMEPICKER',
+      labelName?: string,
       dateValue?: string,
       placeholder?: string,
       showDateTimePicker: Function,
       isVisible: boolean,
       onConfirm: Function,
       onCancel: Function,
+      mode?: 'date' | 'time' | 'both',
     }
   | {
       index: string,
@@ -61,11 +65,11 @@ export default function FieldForm(props: Props) {
   let today = new Date();
 
   if (props.type === 'TEXT_INPUT') {
-    let {placeholder} = props;
+    let {placeholder, title, value} = props;
     inputField = (
       <View style={styles.inputContainer}>
         <View style={styles.lblTripNameContainer}>
-          <Text style={styles.lblTripName}>Trip Name:</Text>
+          <Text style={styles.lblTripName}>{`${title}:`}</Text>
         </View>
         <View style={styles.txtInputTripNameContainer}>
           <TextInput
@@ -74,18 +78,28 @@ export default function FieldForm(props: Props) {
             onChangeText={props.onChangeText}
             autoCorrect={false}
             underlineColorAndroid="transparent"
+            value={value}
           />
         </View>
       </View>
     );
   }
-  if (props.type === 'DATEPICKER') {
+  if (props.type === 'DATETIMEPICKER') {
     let {placeholder} = props;
-    let {dateValue, showDateTimePicker, isVisible, onConfirm, onCancel} = props;
+    let {
+      dateValue,
+      showDateTimePicker,
+      isVisible,
+      onConfirm,
+      onCancel,
+      mode = 'date',
+      labelName = 'Date',
+      ...otherProps
+    } = props;
     inputField = (
       <View style={styles.inputContainer}>
         <View style={styles.lblTripNameContainer}>
-          <Text style={styles.lblTripName}>Date:</Text>
+          <Text style={styles.lblTripName}>{`${labelName}:`}</Text>
         </View>
         <View style={styles.txtInputTripNameContainer}>
           <TouchableOpacity onPress={showDateTimePicker}>
@@ -103,6 +117,8 @@ export default function FieldForm(props: Props) {
             onConfirm={(date) => onConfirm(date)}
             onCancel={onCancel}
             minimumDate={today}
+            mode={mode}
+            {...otherProps}
           />
         </View>
       </View>

@@ -19,7 +19,11 @@ export default class SplashScene extends Component<Props, State> {
   componentDidMount = () => {
     AsyncStorage.getItem('username').then((data) => {
       if (data != null) {
-        this._resetAction('HomeScene');
+        AsyncStorage.getItem('role').then((role) => {
+          role === 'ADMIN'
+            ? this._resetAction('AdminHomeScene')
+            : this._resetAction('HomeScene');
+        });
       } else {
         this._resetAction('Login');
       }

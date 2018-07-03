@@ -4,7 +4,7 @@ import {Alert, StyleSheet, TouchableOpacity, View} from 'react-native';
 
 import {Ionicons} from '@expo/vector-icons';
 
-import FieldForm from './components/FieldForm';
+import FieldForm from '../../components/FieldForm';
 import {Text} from '../../components/CoreComponents';
 import sprintf from '../../helpers/sprintf';
 import {SERVER_NAME} from '../../data/config';
@@ -67,7 +67,7 @@ export default class AddNewTrip extends Component<Props, State> {
           latlng = '&lat=-8.634864&lang=115.192476';
         }
         let data = await fetch(
-          `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}${latlng}`,
+          `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}${latlng}&startTime=12:00`,
         );
         let jsonData = await data.json();
         let destination = jsonData.destination;
@@ -154,6 +154,7 @@ export default class AddNewTrip extends Component<Props, State> {
         <View>
           <FieldForm
             index="1"
+            title="Trip Name"
             type="TEXT_INPUT"
             placeholder="Trip Name"
             onChangeText={(text) => {
@@ -162,7 +163,7 @@ export default class AddNewTrip extends Component<Props, State> {
           />
           <FieldForm
             index="2"
-            type="DATEPICKER"
+            type="DATETIMEPICKER"
             placeholder="Date"
             dateValue={tripDate}
             showDateTimePicker={this._showDateTimePicker}

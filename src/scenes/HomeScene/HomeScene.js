@@ -12,7 +12,7 @@ import {
 // $FlowFixMe
 import {NavigationActions} from 'react-navigation';
 import {Text} from '../../components/CoreComponents';
-import FloatingButton from './components/FloatingButton';
+import FloatingButton from '../../components/FloatingButton';
 import Trip from './components/Trip';
 
 import {baseColors, BACKGROUND_GREY} from '../../constants/colors';
@@ -43,7 +43,7 @@ export default class HomeScene extends Component<Props, State> {
       },
       headerTintColor: 'white',
       headerRight: (
-        <View>
+        <View style={{paddingHorizontal: 20}}>
           <TouchableOpacity onPress={params.logout}>
             <Text style={{color: 'white'}}>Sign Out</Text>
           </TouchableOpacity>
