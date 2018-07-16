@@ -44,7 +44,7 @@ export default class Register extends Component<Props, State> {
         let {status} = jsonData;
         if (status === 'OK') {
           ToastAndroid.showWithGravity(
-            'All Your Base Are Belong To Us',
+            'Your account has been registered.',
             ToastAndroid.SHORT,
             ToastAndroid.CENTER,
           );
