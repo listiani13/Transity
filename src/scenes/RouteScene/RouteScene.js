@@ -79,10 +79,10 @@ export default class RouteScene extends Component<Props, State> {
   _getRoute = async () => {
     this.setState({isLoading: true});
     let {params} = this.props.navigation.state;
-    let {availTime, numDest} = params;
+    let {availTime, numDest, startingTime} = params;
     try {
       let data = await fetch(
-        `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}`,
+        `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}&startTime=${startingTime}`,
       );
       let jsonData = await data.json();
       let destination = jsonData.destination;
@@ -108,6 +108,8 @@ export default class RouteScene extends Component<Props, State> {
         this.setState({isLoading: false, destination: destDesc});
       }, 500);
     } catch (error) {
+      console.log('error route scene', error);
+      this.setState({isLoading: false});
       this._displayErrorMessage('Error Occured', error.message);
     }
   };
