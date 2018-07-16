@@ -116,23 +116,35 @@ export default class HomeScene extends Component<Props, State> {
     let {data} = this.state;
     return (
       <View style={styles.container}>
-        <ScrollView width="100%" contentContainerStyle={{padding: 10}}>
-          {data
-            .slice(0)
-            .reverse()
-            .map((item, id) => {
-              return (
-                <Trip
-                  key={id}
-                  title={item.title}
-                  sights={item.sight}
-                  isOpen={item.isOpen}
-                  onToggleRoute={() => this._onToggleRoute(item.id)}
-                  routeData={item.route}
-                />
-              );
-            })}
-        </ScrollView>
+        {data.length < 1 ? (
+          <View
+            style={{alignItems: 'center', justifyContent: 'center', flex: 1}}
+          >
+            <Text
+              size="EXTRA_LARGE"
+              grey
+            >{`Nothing to show here...\nWanna plan something new?`}</Text>
+          </View>
+        ) : (
+          <ScrollView width="100%" contentContainerStyle={{padding: 10}}>
+            {data
+              .slice(0)
+              .reverse()
+              .map((item, id) => {
+                return (
+                  <Trip
+                    key={id}
+                    title={item.title}
+                    sights={item.sight}
+                    isOpen={item.isOpen}
+                    onToggleRoute={() => this._onToggleRoute(item.id)}
+                    routeData={item.route}
+                  />
+                );
+              })}
+          </ScrollView>
+        )}
+
         <FloatingButton
           onPress={() => this.props.navigation.navigate('AddNewTrip')}
         />
