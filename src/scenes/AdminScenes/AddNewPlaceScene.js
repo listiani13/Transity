@@ -115,6 +115,7 @@ export default class AddNewPlaceScene extends Component<Props, State> {
         placeID,
         openingTime,
         closingTime,
+        open24h,
       } = this.state;
       let url = placeID == null ? 'insert_destinations' : 'update_destinations';
       let body = {
@@ -124,6 +125,7 @@ export default class AddNewPlaceScene extends Component<Props, State> {
         lng: longitude,
         opening_time: openingTime,
         closing_time: closingTime,
+        open_24h: open24h ? 'Y' : '',
       };
 
       let raw = await fetch(`${SERVER_NAME}/admin/${url}.php`, {
