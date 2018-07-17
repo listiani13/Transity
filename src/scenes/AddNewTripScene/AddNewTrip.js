@@ -5,7 +5,7 @@ import {Alert, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 
 import FieldForm from '../../components/FieldForm';
-import {Text} from '../../components/CoreComponents';
+import {Text, Loading} from '../../components/CoreComponents';
 import sprintf from '../../helpers/sprintf';
 import {SERVER_NAME} from '../../data/config';
 type Props = {
@@ -82,6 +82,11 @@ export default class AddNewTrip extends Component<Props, State> {
           `${SERVER_NAME}/Generasi.php?availTime=${availTime}&numDest=${numDest}${latlng}&startTime=${startingTime}`,
         );
         let jsonData = await data.json();
+        if (jsonData.status === 'fail') {
+          this.setState({isLoading: false});
+          this._displayErrorMessage('Error Occured', jsonData.error);
+          return;
+        }
         let destination = jsonData.destination;
         let destDesc = [];
         let idxTravelDistance = 0;
@@ -96,18 +101,23 @@ export default class AddNewTrip extends Component<Props, State> {
           } else {
             destDesc.push({
               placeName: val,
-              placeDesc: jsonData.travel_distance[idxTravelDistance] + ' km',
+              placeDesc:
+                Number(jsonData.travel_distance[idxTravelDistance]) + ' km',
               travelTime:
-                jsonData.travel_distance[idxTravelDistance] / VELOCITY * 60,
+                Number(jsonData.travel_distance[idxTravelDistance]) /
+                VELOCITY *
+                60,
             });
           }
         });
+        this.setState({isLoading: false});
         this.props.navigation.navigate('RouteScene', {
           destination: destDesc,
           availTime,
           numDest,
           tripName,
           tripDate,
+          startingTime,
         });
       } catch (error) {
         this._displayErrorMessage('Error Occured', error.message);
@@ -167,7 +177,7 @@ export default class AddNewTrip extends Component<Props, State> {
     }
   };
   render() {
-    let {tripDate, startingTime} = this.state;
+    let {tripDate, startingTime, isLoading} = this.state;
     return (
       <View style={styles.container}>
         <View>
@@ -216,7 +226,7 @@ export default class AddNewTrip extends Component<Props, State> {
             onCancel={() => this._hideDateTimePicker('isStartingTimeVisible')}
             mode="time"
             is24Hour={false}
-            labelName="Closing Hours"
+            labelName="Starting Time"
           />
           <FieldForm
             index="5"
@@ -239,6 +249,7 @@ export default class AddNewTrip extends Component<Props, State> {
             <Text style={styles.txtBtnNext}>Next</Text>
           </View>
         </TouchableOpacity>
+        {isLoading ? <Loading /> : null}
       </View>
     );
   }
