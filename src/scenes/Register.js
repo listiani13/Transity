@@ -2,8 +2,6 @@
 import React, {Component} from 'react';
 import {
   Alert,
-  AsyncStorage,
-  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -34,8 +32,6 @@ export default class Register extends Component<Props, State> {
     });
   };
   _register = async () => {
-    console.log('eh kepencet');
-
     let {username, password} = this.state;
     if (username !== '' && password !== '') {
       try {
@@ -48,7 +44,6 @@ export default class Register extends Component<Props, State> {
           body: JSON.stringify(body),
         });
         let jsonData = await data.json();
-        console.log('jsonData', jsonData);
 
         let {status} = jsonData;
         if (status === 'OK') {
