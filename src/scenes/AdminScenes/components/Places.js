@@ -10,12 +10,24 @@ import {baseTextStyle} from '../../../constants/text';
 
 type Props = {
   destName: string,
+  openingTime: string,
+  closingTime: string,
+  open24h: boolean,
   onDeletePress: (id: string) => void,
   onEditPress: (id: string) => void,
 };
 export default function Places(props: Props) {
-  let {destName, onEditPress, onDeletePress} = props;
+  let {
+    destName,
+    onEditPress,
+    onDeletePress,
+    openingTime,
+    closingTime,
+    open24h,
+  } = props;
   let iconSize = baseTextStyle.EXTRA_LARGE_FONT_SIZE;
+
+  let time = open24h ? '24 hours' : `${openingTime} - ${closingTime}`;
   const rightButtons = [
     <TouchableNativeFeedback key="1" onPress={onEditPress}>
       <View
@@ -34,7 +46,7 @@ export default function Places(props: Props) {
     <Swipeable rightButtons={rightButtons}>
       <Card style={styles.container}>
         <Text size="MEDIUM">{destName}</Text>
-        <Text>Opening hours: 24 hours</Text>
+        <Text>{`Opening hours: ${time}`}</Text>
       </Card>
     </Swipeable>
   );

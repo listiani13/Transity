@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
   Picker,
+  Switch,
 } from 'react-native';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import {Entypo} from '@expo/vector-icons';
@@ -58,6 +59,13 @@ type Props =
       type: 'DROPDOWN',
       onValueChange: Function,
       selectedValue: string,
+    }
+  | {
+      index?: string,
+      type: 'SWITCH',
+      onValueChange: Function,
+      value: boolean,
+      placeholder: string,
     };
 export default function FieldForm(props: Props) {
   let {index} = props;
@@ -120,6 +128,19 @@ export default function FieldForm(props: Props) {
             mode={mode}
             {...otherProps}
           />
+        </View>
+      </View>
+    );
+  }
+  if (props.type === 'SWITCH') {
+    let {placeholder, onValueChange, value, ...otherProps} = props;
+    inputField = (
+      <View style={styles.inputContainer}>
+        <View
+          style={[styles.txtInputTripNameContainer, {flexDirection: 'row'}]}
+        >
+          <Switch onValueChange={onValueChange} value={value} {...otherProps} />
+          <Text>{placeholder}</Text>
         </View>
       </View>
     );
@@ -196,12 +217,16 @@ export default function FieldForm(props: Props) {
       </View>
     );
   }
+  let circleNumbering =
+    props.type === 'SWITCH' ? null : (
+      <View style={styles.circleNumbering}>
+        <Text color={baseColors.white}>{index}</Text>
+      </View>
+    );
   return (
     <View style={styles.fieldContainer}>
       <View style={styles.fieldInnerContainer}>
-        <View style={styles.circleNumbering}>
-          <Text color={baseColors.white}>{index}</Text>
-        </View>
+        {circleNumbering}
         {inputField}
       </View>
     </View>

@@ -2,8 +2,6 @@
 import React, {Component} from 'react';
 import {
   Alert,
-  AsyncStorage,
-  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -28,6 +26,11 @@ export default class Register extends Component<Props, State> {
   _saveData = (val, inputName) => {
     this.setState({[inputName]: val});
   };
+  _displayErrorMessage = (title: string, message: string) => {
+    Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
+      cancelable: false,
+    });
+  };
   _register = async () => {
     let {username, password} = this.state;
     if (username !== '' && password !== '') {
@@ -41,17 +44,24 @@ export default class Register extends Component<Props, State> {
           body: JSON.stringify(body),
         });
         let jsonData = await data.json();
+
         let {status} = jsonData;
         if (status === 'OK') {
           ToastAndroid.showWithGravity(
-            'All Your Base Are Belong To Us',
+            'Your account has been registered.',
             ToastAndroid.SHORT,
             ToastAndroid.CENTER,
           );
           this.props.navigation.navigate('Login');
+        } else {
+          ToastAndroid.showWithGravity(
+            jsonData.error,
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER,
+          );
         }
       } catch (error) {
-        console.log('error', error);
+        this._displayErrorMessage('Error Occured', error.message);
       }
     }
   };

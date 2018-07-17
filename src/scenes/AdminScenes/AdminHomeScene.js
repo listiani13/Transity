@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   InteractionManager,
+  RefreshControl,
 } from 'react-native';
 // $FlowFixMe
 import {NavigationActions} from 'react-navigation';
@@ -27,8 +28,11 @@ export type Place = {
   destName: string,
   lat: string,
   lng: string,
+  openingTime: string,
+  closingTime: string,
+  open24h: boolean,
 };
-type State = {places: Array<Place>, isLoading: boolean};
+type State = {places: Array<Place>, isLoading: boolean, isRefresh: boolean};
 export default class AdminHomeScene extends Component<Props, State> {
   static navigationOptions: ({navigation: NavigationObject}) => Object = ({
     navigation,
@@ -54,6 +58,7 @@ export default class AdminHomeScene extends Component<Props, State> {
   state = {
     places: [],
     isLoading: true,
+    isRefresh: false,
   };
   _getInitialState = async () => {
     try {
@@ -65,6 +70,9 @@ export default class AdminHomeScene extends Component<Props, State> {
           destName: data.dest_name,
           lat: data.lat,
           lng: data.lng,
+          openingTime: data.opening_time.substr(0, 5),
+          closingTime: data.closing_time.substr(0, 5),
+          open24h: data.open_24h === 'Y' ? true : false,
         };
       });
       this.setState({places: filteredData, isLoading: false});
@@ -136,36 +144,54 @@ export default class AdminHomeScene extends Component<Props, State> {
       }
     });
   };
+  _onRefresh = () => {
+    this.setState({isRefresh: true});
+    this._getInitialState();
+    this.setState({isRefresh: false});
+  };
   render() {
-    let {places, isLoading} = this.state;
+    let {places, isLoading, isRefresh} = this.state;
     return (
       <View style={styles.container}>
-        <ScrollView>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            places
-              .slice(0)
-              .reverse()
-              .map((data) => {
-                return (
-                  <Places
-                    destName={data.destName}
-                    key={data.destID}
-                    onDeletePress={() => {
-                      this._onDeletePress(data.destID);
-                    }}
-                    onEditPress={() => {
-                      this._onEditPress(data.destID);
-                    }}
-                  />
-                );
-              })
-          )}
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefresh}
+              onRefresh={this._onRefresh}
+            />
+          }
+        >
+          {places.length < 1
+            ? null
+            : places
+                .slice(0)
+                .reverse()
+                .map((data) => {
+                  return (
+                    <Places
+                      destName={data.destName}
+                      openingTime={data.openingTime}
+                      closingTime={data.closingTime}
+                      open24h={data.open24h}
+                      key={data.destID}
+                      onDeletePress={() => {
+                        this._onDeletePress(data.destID);
+                      }}
+                      onEditPress={() => {
+                        this._onEditPress(data.destID);
+                      }}
+                    />
+                  );
+                })}
         </ScrollView>
-        <FloatingButton
-          onPress={() => this.props.navigation.navigate('AddNewPlaceScene')}
-        />
+
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <FloatingButton
+            onPress={() => this.props.navigation.navigate('AddNewPlaceScene')}
+          />
+        )}
       </View>
     );
   }
