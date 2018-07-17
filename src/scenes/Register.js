@@ -28,7 +28,14 @@ export default class Register extends Component<Props, State> {
   _saveData = (val, inputName) => {
     this.setState({[inputName]: val});
   };
+  _displayErrorMessage = (title: string, message: string) => {
+    Alert.alert(title, message, [{text: 'OK', onPress: () => {}}], {
+      cancelable: false,
+    });
+  };
   _register = async () => {
+    console.log('eh kepencet');
+
     let {username, password} = this.state;
     if (username !== '' && password !== '') {
       try {
@@ -41,6 +48,8 @@ export default class Register extends Component<Props, State> {
           body: JSON.stringify(body),
         });
         let jsonData = await data.json();
+        console.log('jsonData', jsonData);
+
         let {status} = jsonData;
         if (status === 'OK') {
           ToastAndroid.showWithGravity(
@@ -49,9 +58,15 @@ export default class Register extends Component<Props, State> {
             ToastAndroid.CENTER,
           );
           this.props.navigation.navigate('Login');
+        } else {
+          ToastAndroid.showWithGravity(
+            jsonData.error,
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER,
+          );
         }
       } catch (error) {
-        console.log('error', error);
+        this._displayErrorMessage('Error Occured', error.message);
       }
     }
   };
